@@ -10,19 +10,16 @@ let gameboard = (function () {
             // grid.className("layout");
             // container.appendChild(grid);
         }
-        console.log(size);
     };
 
-    const getSize = function(){
+    const getSize = function () {
         // console.log(this.size);
         return size;
     };
 
-    const setSize = function(index, value){
+    const setSize = function (index, value) {
         size[index] = value;
         gameController.playerTurn();
-        console.log(getSize());
-        console.log(gameController.playerLabel());
     };
 
     return { layout, getSize, setSize };
@@ -36,39 +33,46 @@ let player = {
 let gameController = (function () {
     // game flow
     var currentPlayer = player.playerA;
-    currentPlayer = Object.assign({}, currentPlayer);
-
     const playerTurn = function () {
-        // Object.values(player).forEach(function (value) {
-            if(currentPlayer.name === "A"){
-                currentPlayer.name = "B";
-            }
-            else{
-                currentPlayer.name = "A";
-            }
-        // });
+        if (currentPlayer === player.playerA) {
+            currentPlayer = player.playerB;
+        }
+        else {
+            currentPlayer = player.playerA;
+        }
     };
 
-    const playerLabel = function(){
-        return `player ${currentPlayer.name}'s turn`};
+    const playerLabel = function () {
+        return `player ${currentPlayer.name}'s turn, ${currentPlayer.mark}`
+    };
 
-    const markIndex = function(index){
-        for(let i=0; i<gameboard.getSize(); i++){
-            if(i === index){
+    const markIndex = function (index) {
+        for (let i = 0; i < gameboard.getSize().length; i++) {
+            if (i === index) {
                 //write condition to check whether O/X at the selected position
-
-
-                gameboard.setSize(i, currentPlayer.mark);
-                return gameboard.getSize();
+                if (gameboard.getSize()[i] != "O" && gameboard.getSize()[i] != "X") {
+                    gameboard.setSize(i, currentPlayer.mark);
+                    return screenController.label();
+                }
+                else {
+                    console.log("unable to mark this position, please try again");
+                    return screenController.label();
+                }
+                // break;
             }
         }
-        return gameboard.getSize();
     };
+    return { playerTurn, playerLabel, markIndex };
+})();
 
-    return {playerTurn, playerLabel, markIndex};
+let screenController = (function () {
+    // display array and player's turn 
+    const label = function () {
+        console.log(gameController.playerLabel());
+        console.log(gameboard.getSize());
+    }
+    return { label };
 })();
 
 gameboard.layout();
-// gameController.playerLabel;
-gameboard.setSize(0, "o");
-console.log(gameboard.getSize());
+screenController.label();
