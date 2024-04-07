@@ -56,7 +56,7 @@ let gameController = (function () {
 
     const markIndex = function (row, column) {
         //write condition to check whether O/X at the selected position
-        if (gameboard.getBoard()[row][column] != "O" && gameboard.getBoard()[row][column] != "X") {
+        if (gameboard.getBoard()[row][column] != "O" && gameboard.getBoard()[row][column] != "X" && row<gameboard.getBoard().length && column<gameboard.getBoard().length) {
             gameboard.setBoard(row, column, currentPlayer.mark);
             console.log(winCondition());
             return screenController.label();
