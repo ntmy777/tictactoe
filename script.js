@@ -36,6 +36,17 @@ let gameboard = (function () {
 let player = {
     playerA: { name: "A", mark: "O" },
     playerB: { name: "B", mark: "X" },
+    getName : function (winPlayer) {
+        var winName = "";
+        if (winPlayer === player.playerA.mark) {
+            winName = player.playerA.name;
+        }
+        else {
+            winName = player.playerB.name;
+        }
+
+        return winName;
+    }
 };
 
 let gameController = (function () {
@@ -59,24 +70,13 @@ let gameController = (function () {
         if (gameboard.getBoard()[row][column] != "O" && gameboard.getBoard()[row][column] != "X" && row<gameboard.getBoard().length && column<gameboard.getBoard().length) {
             gameboard.setBoard(row, column, currentPlayer.mark);
             console.log(winCondition());
+            console.log(tie());
             return screenController.label();
         }
         else {
             console.log("unable to mark this position, please try again");
             return screenController.label();
         }
-    };
-
-    const winner = function (winPlayer) {
-        var winName = "";
-        if (winPlayer === player.playerA.mark) {
-            winName = player.playerA.name;
-        }
-        else {
-            winName = player.playerB.name;
-        }
-
-        return winName;
     };
 
     const winCondition = function () {
@@ -87,7 +87,7 @@ let gameController = (function () {
             if (gameboard.getBoard()[i][0] !== "") {
                 var rowFirstMark = gameboard.getBoard()[i][0];
                 //get row player's name
-                var rowPlayer = winner(rowFirstMark);
+                var rowPlayer = player.getName(rowFirstMark);
 
                 let innerRow = true;
                 for (let j = 0; j < gameboard.getBoard().length - 1; j++) {
@@ -113,7 +113,7 @@ let gameController = (function () {
                 var columnFirstMark = gameboard.getBoard()[0][i];
 
                 //get column player's name
-                var colPlayer = winner(columnFirstMark);
+                var colPlayer = player.getName(columnFirstMark);
 
                 var innerVertical = true;
                 for (let j = 0; j < gameboard.getBoard().length - 1; j++) {
@@ -139,7 +139,7 @@ let gameController = (function () {
             }
             if (diagonalLeftToRight) {
                 //get column player's name
-                var firstDiagonalPlayer = winner(firstMark);
+                var firstDiagonalPlayer = player.getName(firstMark);
                 gameWinner = firstDiagonalPlayer;
             }
         }
@@ -155,7 +155,7 @@ let gameController = (function () {
             }
             if (diagonalRightToLeft) {
                 //get column player's name
-                var lastDiagonalPlayer = winner(lastMark);
+                var lastDiagonalPlayer = player.getName(lastMark);
                 gameWinner = lastDiagonalPlayer;
             }
         }
@@ -166,7 +166,25 @@ let gameController = (function () {
             return gameboard.resetBoard();
         }
     };
-    return { playerTurn, playerLabel, markIndex, winCondition };
+
+    const tie = function(){
+        var emptySlot = false;
+        for(let i=0; i<gameboard.getBoard().length; i++){
+            for(let j=0; j<gameboard.getBoard().length; j++){
+                if(gameboard.getBoard()[i][j]===""){
+                    emptySlot = true;
+                }
+            }
+        }
+
+        if(!emptySlot){
+            console.log(`tie!`);
+            currentPlayer = player.playerA;
+            return gameboard.resetBoard();
+        }
+    };
+
+    return { playerTurn, playerLabel, markIndex, winCondition, tie };
 })();
 
 let screenController = (function () {
