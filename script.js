@@ -1,42 +1,37 @@
 let gameboard = (function () {
     const board = [];
-    const layout = function () {
-        // var container = document.querySelector(".container");
-        // container.style.gridTemplateColumns=`repeat(${Math.sqrt(this.board)}, 1fr)`;
-        // container.style.gridTemplateRows=`repeat(${Math.sqrt(this.board)}, 1fr)`;
-        for (let i = 0; i < 3; i++) {
+    const setBoardSize = function (size = 3) {
+        return size;
+    };
+    const setBoard = function () {
+        for (let i = 0; i < setBoardSize(3); i++) {
             board[i] = [];
-            for (let j = 0; j < 3; j++) {
+            for (let j = 0; j < setBoardSize(3); j++) {
                 board[i].push("");
             }
-            // const grid = document.createElement("grid");
-            // grid.className("layout");
-            // container.appendChild(grid);
         }
     };
 
     const getBoard = function () {
-        // console.log(this.board);
         return board;
     };
 
-    const setBoard = function (row, column, value) {
+    const setBoardValue = function (row, column, value) {
         board[row][column] = value;
         gameController.playerTurn();
     };
 
-    const resetBoard = function(){
-        size = [];
-        layout();
+    const resetBoard = function () {
+        setBoard();
     }
 
-    return { layout, getBoard, setBoard, resetBoard};
+    return { setBoardSize, setBoard, getBoard, setBoardValue, resetBoard };
 })();
 
 let player = {
     playerA: { name: "A", mark: "O" },
     playerB: { name: "B", mark: "X" },
-    getName : function (winPlayer) {
+    getName: function (winPlayer) {
         var winName = "";
         if (winPlayer === player.playerA.mark) {
             winName = player.playerA.name;
@@ -65,16 +60,26 @@ let gameController = (function () {
         return `player ${currentPlayer.name}'s turn`
     };
 
+    var marking = false;
+    const getMarked = function () {
+        return marking;
+    };
+
+    const setMarked = function (marked) {
+        marking = marked;
+    };
+
     const markIndex = function (row, column) {
         //write condition to check whether O/X at the selected position
-        if (gameboard.getBoard()[row][column] != "O" && gameboard.getBoard()[row][column] != "X" && row<gameboard.getBoard().length && column<gameboard.getBoard().length) {
-            gameboard.setBoard(row, column, currentPlayer.mark);
-            console.log(winCondition());
-            console.log(tie());
+        if (gameboard.getBoard()[row][column] != "O" && gameboard.getBoard()[row][column] != "X" && row < gameboard.getBoard().length && column < gameboard.getBoard().length) {
+            gameboard.setBoardValue(row, column, currentPlayer.mark);
+            setMarked(true);
+            winCondition();
+            tie();
             return screenController.label();
         }
         else {
-            console.log("unable to mark this position, please try again");
+            window.alert("unable to mark this position, please try again");
             return screenController.label();
         }
     };
@@ -161,41 +166,78 @@ let gameController = (function () {
         }
 
         if (diagonalLeftToRight || diagonalRightToLeft || outerRow || outerVertical) {
-            console.log(`player ${gameWinner} win`);
+            window.alert(`player ${gameWinner} win`);
             currentPlayer = player.playerA;
-            return gameboard.resetBoard();
+            setMarked(false);
+            return screenController.initialize();
         }
     };
 
-    const tie = function(){
+    const tie = function () {
         var emptySlot = false;
-        for(let i=0; i<gameboard.getBoard().length; i++){
-            for(let j=0; j<gameboard.getBoard().length; j++){
-                if(gameboard.getBoard()[i][j]===""){
+        for (let i = 0; i < gameboard.getBoard().length; i++) {
+            for (let j = 0; j < gameboard.getBoard().length; j++) {
+                if (gameboard.getBoard()[i][j] === "") {
                     emptySlot = true;
                 }
             }
         }
 
-        if(!emptySlot){
-            console.log(`tie!`);
+        if (!emptySlot) {
+            window.alert(`tie!`);
             currentPlayer = player.playerA;
-            return gameboard.resetBoard();
+            setMarked(false);
+            return screenController.initialize();
         }
     };
 
-    return { playerTurn, playerLabel, markIndex, winCondition, tie };
+    return { playerTurn, playerLabel, markIndex, winCondition, tie, getMarked };
 })();
 
 let screenController = (function () {
     // display array and player's turn 
+    const container = document.querySelector(".container");
     const label = function () {
-        console.log(gameController.playerLabel());
-        console.log(gameboard.getBoard());
+        let labelDisplay = document.querySelector(".label");
+        labelDisplay.textContent = gameController.playerLabel();
+        // console.log(gameboard.getBoard());
     }
-    return { label };
+
+    const updateBoard = function (e) {
+        const i = parseInt(e.target.dataset.row);
+        const j = parseInt(e.target.dataset.column);
+        gameController.markIndex(i, j);
+        if (gameController.getMarked()) {
+            e.target.textContent = gameboard.getBoard()[i][j];
+        };
+    }
+
+    const initialize = function () {
+        gameboard.resetBoard();
+        // label();
+        container.textContent="";
+        const label = document.querySelector(".label");
+        container.style.gridTemplateColumns = `repeat(${(gameboard.getBoard().length)}, 1fr)`;
+        container.style.gridTemplateRows = `repeat(${gameboard.getBoard().length}, 1fr)`;
+
+        for (let i = 0; i < gameboard.getBoard().length; i++) {
+            for (let j = 0; j < gameboard.getBoard().length; j++) {
+                const grid = document.createElement("div");
+                grid.classList.add("boardCell");
+                grid.textContent = gameboard.getBoard()[i][j];
+                grid.dataset.row = i;
+                grid.dataset.column = j;
+                grid.addEventListener('click', (e) => {
+                    updateBoard(e);
+                });
+                container.appendChild(grid);
+            }
+        }
+    };
+
+    return { label, initialize, updateBoard };
 })();
 
-gameboard.resetBoard();
-screenController.label();
+screenController.initialize();
+
 

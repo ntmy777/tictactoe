@@ -1,0 +1,19 @@
+.container{
+    display: grid;
+    width: 300px; 
+    height: 300px;
+}
+
+.boardCell {
+    background-color: white;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.boardCell:hover {
+    background-color: lightgray;
+}
