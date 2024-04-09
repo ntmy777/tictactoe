@@ -21,11 +21,7 @@ let gameboard = (function () {
         gameController.playerTurn();
     };
 
-    const resetBoard = function () {
-        setBoard();
-    }
-
-    return { setBoardSize, setBoard, getBoard, setBoardValue, resetBoard };
+    return { setBoardSize, setBoard, getBoard, setBoardValue };
 })();
 
 let player = {
@@ -57,7 +53,7 @@ let gameController = (function () {
     };
 
     const playerLabel = function () {
-        return `player ${currentPlayer.name}'s turn`
+        return `Player ${currentPlayer.name}'s turn`
     };
 
     var marking = false;
@@ -74,8 +70,12 @@ let gameController = (function () {
         if (gameboard.getBoard()[row][column] != "O" && gameboard.getBoard()[row][column] != "X" && row < gameboard.getBoard().length && column < gameboard.getBoard().length) {
             gameboard.setBoardValue(row, column, currentPlayer.mark);
             setMarked(true);
-            winCondition();
-            tie();
+            // winCondition();
+            // tie();
+            setTimeout(() => {
+                winCondition();
+                tie();
+            }, 100);
             return screenController.label();
         }
         else {
@@ -166,7 +166,7 @@ let gameController = (function () {
         }
 
         if (diagonalLeftToRight || diagonalRightToLeft || outerRow || outerVertical) {
-            window.alert(`player ${gameWinner} win`);
+            window.alert(`Player ${gameWinner} win`);
             currentPlayer = player.playerA;
             setMarked(false);
             return screenController.initialize();
@@ -197,10 +197,10 @@ let gameController = (function () {
 let screenController = (function () {
     // display array and player's turn 
     const container = document.querySelector(".container");
+    const labelDisplay = document.querySelector(".label");
+
     const label = function () {
-        let labelDisplay = document.querySelector(".label");
         labelDisplay.textContent = gameController.playerLabel();
-        // console.log(gameboard.getBoard());
     }
 
     const updateBoard = function (e) {
@@ -213,10 +213,9 @@ let screenController = (function () {
     }
 
     const initialize = function () {
-        gameboard.resetBoard();
-        // label();
-        container.textContent="";
-        const label = document.querySelector(".label");
+        gameboard.setBoard();
+        label();
+        container.textContent = "";
         container.style.gridTemplateColumns = `repeat(${(gameboard.getBoard().length)}, 1fr)`;
         container.style.gridTemplateRows = `repeat(${gameboard.getBoard().length}, 1fr)`;
 
